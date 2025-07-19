@@ -30,9 +30,11 @@ jobs:
         # This step now creates the .npmrc file directly within the ./package directory
         # because of the 'defaults.run.working-directory' setting.
         run: |
-          cd package
+          pwd
           echo "@koerber-design-system:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+          ls -lart
+          cat .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub Actions token for authentication
 
