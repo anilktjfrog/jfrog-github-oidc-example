@@ -45,11 +45,6 @@ jobs:
         # Assuming you have a 'test' script defined in your package.json
         run: npm test # Run the test script for your project
 
-      - name: Build project
-        # This step assumes you have a 'build' script defined in your package.json
-        # For example: "scripts": { "build": "tsc" } or "build": "webpack"
-        run: npm run build # Run the build script for your project
-
       - name: Publish package
         run: npm publish # Publish the package to the configured registry
         env:
