@@ -1,14 +1,14 @@
 name: Publish NPM Package to GitHub Packages
 
 on:
-  workflow_dispatch:
-  
+  workflow_dispatch: # Trigger the workflow manually
+
 jobs:
   build-and-github-publish:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     defaults:
       run:
-        working-directory: ./package
+        working-directory: ./package # All subsequent 'run' commands will execute in this directory
 
     permissions:
       contents: read # Allow reading repository content
@@ -23,12 +23,14 @@ jobs:
         with:
           node-version: '20.x' # Specify the Node.js version to use
           registry-url: 'https://npm.pkg.github.com/' # Configure npm to use GitHub Packages registry
-          scope: '@koerber-design-system' # IMPORTANT: Replace 'your-scope' with your actual GitHub username or organization name
-          
+          # The scope here should match the scope in your package.json (e.g., "@koerber-design-system")
+          scope: '@koerber-design-system'
+
       - name: Create .npmrc for GitHub Packages
+        # This step now creates the .npmrc file directly within the ./package directory
+        # because of the 'defaults.run.working-directory' setting.
         run: |
-          # This creates a .npmrc file that tells npm where to find your scoped package
-          # and how to authenticate.
+          cd package
           echo "@koerber-design-system:registry=https://npm.pkg.github.com/" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
         env:
@@ -38,11 +40,15 @@ jobs:
         run: npm install # Install all project dependencies
 
       - name: Test project
-        run: npm test # Run the build script for your project
+        # Assuming you have a 'test' script defined in your package.json
+        run: npm test # Run the test script for your project
+
+      - name: Build project
+        # This step assumes you have a 'build' script defined in your package.json
+        # For example: "scripts": { "build": "tsc" } or "build": "webpack"
+        run: npm run build # Run the build script for your project
 
       - name: Publish package
         run: npm publish # Publish the package to the configured registry
         env:
-          # NODE_AUTH_TOKEN is automatically set by actions/setup-node when registry-url is GitHub Packages
-          # and permissions.packages: write is granted.
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
