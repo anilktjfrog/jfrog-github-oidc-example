@@ -23,18 +23,22 @@ jobs:
         with:
           node-version: '20.x' # Specify the Node.js version to use
           registry-url: 'https://npm.pkg.github.com/' # Configure npm to use GitHub Packages registry
-          # The scope here should match the scope in your package.json (e.g., "@koerber-design-system")
+          # IMPORTANT: The 'scope' here MUST match the scope in your package.json's 'name' field.
+          # For example, if your package name is "@koerber-design-system/my-lib", this scope is correct.
           scope: '@koerber-design-system'
 
-      - name: Create .npmrc for GitHub Packages
-        # This step now creates the .npmrc file directly within the ./package directory
-        # because of the 'defaults.run.working-directory' setting.
+      - name: Create .npmrc for GitHub Packages and general auth
+        # This step creates a .npmrc file within the working directory (./package).
+        # It configures authentication for both your scoped GitHub Packages registry
+        # and provides a token for the default npm registry (registry.npmjs.org)
+        # to handle any potential interactions there (e.g., fetching public dependencies).
         run: |
-          pwd
+          # Directs packages under @koerber-design-system to GitHub Packages
           echo "@koerber-design-system:registry=https://npm.pkg.github.com/" > .npmrc
+          # Provides authentication token for GitHub Packages
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
-          ls -lart
-          cat .npmrc
+          # Provides authentication token for the public npm registry, in case it's accessed
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub Actions token for authentication
 
