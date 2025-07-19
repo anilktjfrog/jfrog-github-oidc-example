@@ -1,0 +1,39 @@
+name: Publish NPM Package to GitHub Packages
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build-and-github-publish:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+    defaults:
+      run:
+        working-directory: ./package
+
+    permissions:
+      contents: read # Allow reading repository content
+      packages: write # Allow writing to GitHub Packages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4 # Action to set up Node.js environment
+        with:
+          node-version: '20.x' # Specify the Node.js version to use
+          registry-url: 'https://npm.pkg.github.com/' # Configure npm to use GitHub Packages registry
+          scope: '@koerber-design-system' # IMPORTANT: Replace 'your-scope' with your actual GitHub username or organization name
+
+      - name: Install dependencies
+        run: npm install # Install all project dependencies
+
+      - name: Test project
+        run: npm test # Run the build script for your project
+
+      - name: Publish package
+        run: npm publish # Publish the package to the configured registry
+        env:
+          # NODE_AUTH_TOKEN is automatically set by actions/setup-node when registry-url is GitHub Packages
+          # and permissions.packages: write is granted.
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
