@@ -24,6 +24,15 @@ jobs:
           node-version: '20.x' # Specify the Node.js version to use
           registry-url: 'https://npm.pkg.github.com/' # Configure npm to use GitHub Packages registry
           scope: '@koerber-design-system' # IMPORTANT: Replace 'your-scope' with your actual GitHub username or organization name
+          
+      - name: Create .npmrc for GitHub Packages
+        run: |
+          # This creates a .npmrc file that tells npm where to find your scoped package
+          # and how to authenticate.
+          echo "@koerber-design-system:registry=https://npm.pkg.github.com/" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub Actions token for authentication
 
       - name: Install dependencies
         run: npm install # Install all project dependencies
