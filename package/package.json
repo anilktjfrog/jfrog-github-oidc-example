@@ -1,6 +1,6 @@
 {
   "name": "@anilktjfrog/jfrog-npm-example",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Add a frog emoji to a given string and do some more frog stuff related 🐸",
   "main": "index.js",
   "scripts": {
