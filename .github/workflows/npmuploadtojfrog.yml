@@ -9,7 +9,7 @@ jobs:
     env:
       OIDC_PROVIDER: "jfrog-npm-github-oidc-provider" # OIDC provider name for JFrog
       PLATFORM_REPO: "githubnpm-npm"
-      NPM_SCOPE: "@ps-jfrog" # NPM scope for the package
+      NPM_SCOPE: "@anilktjfrog" # NPM scope for the package
       NPM_REGISTRY: "https://npm.pkg.github.com/" # NPM registry URL
       NODE_VERSION: "20.x" # Node.js version to use
     defaults:
