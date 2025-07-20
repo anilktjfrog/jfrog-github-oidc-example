@@ -1,5 +1,5 @@
 {
-  "name": "@koerber-design-system/jfrog-npm-example",
+  "name": "@anilktjfrog/jfrog-npm-example",
   "version": "2.0.0",
   "description": "Add a frog emoji to a given string and do some more frog stuff related 🐸",
   "main": "index.js",
