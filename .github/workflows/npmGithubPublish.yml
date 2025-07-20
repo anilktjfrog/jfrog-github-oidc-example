@@ -25,7 +25,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com/' # Configure npm to use GitHub Packages registry
           # IMPORTANT: The 'scope' here MUST match the scope in your package.json's 'name' field.
           # For example, if your package name is "@anilktjfrog/my-lib", this scope is correct.
-          scope: '@anilktjfrog'
+          scope: '@koerber-design-system'
 
       - name: Install dependencies
         run: npm install # Install all project dependencies
