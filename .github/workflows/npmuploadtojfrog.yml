@@ -66,7 +66,7 @@ jobs:
           ls -lart
           PACKAGE_NAME=$(node -p "require('./package.json').name" | sed 's/${{ env.NPM_SCOPE }}\///g')
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
-          NPM_ARCHIVE_NAME="${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+          NPM_ARCHIVE_NAME="$(echo "${{ env.NPM_SCOPE }}" | sed 's/@//')-${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
           echo "Package Name: ${PACKAGE_NAME}"
           echo "Package Version: ${PACKAGE_VERSION}"
           echo "Looking for NPM archive: ${NPM_ARCHIVE_NAME}"
