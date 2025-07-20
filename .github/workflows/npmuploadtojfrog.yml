@@ -51,10 +51,30 @@ jobs:
         # Assuming you have a 'test' script defined in your package.json
         run: npm test # Run the test script for your project
 
+      - name: Pack NPM package
+        # This command creates the .tgz archive of your package without publishing.
+        run: npm pack && ls -lart
+
       - name: Publish package
         run: npm publish # Publish the package to the configured registry
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload package to JFrog
-        run: ls -lart && jf npm-publish --repo=${{ env.PLATFORM_REPO }} --package=./package # Upload the package to JFrog
+      - name: Find NPM package archive and upload to JFrog
+        id: upload_to_jfrog
+        run: |
+          ls -lart
+          PACKAGE_NAME=$(node -p "require('./package.json').name" | sed 's/@koerber-design-system\///g')
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          NPM_ARCHIVE_NAME="${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+          echo "Package Name: ${PACKAGE_NAME}"
+          echo "Package Version: ${PACKAGE_VERSION}"
+          echo "Looking for NPM archive: ${NPM_ARCHIVE_NAME}"
+          if [ -f "$NPM_ARCHIVE_NAME" ]; then
+            echo "Found ${NPM_ARCHIVE_NAME}. Uploading to JFrog Artifactory..."
+            jf rt upload "${NPM_ARCHIVE_NAME}" "${{ env.PLATFORM_REPO }}/${{ env.NPM_SCOPE }}/${PACKAGE_VERSION}/${PACKAGE_NAME}-${PACKAGE_VERSION}.tgz"
+            echo "JFrog upload complete."
+          else
+            echo "Error: NPM archive ${NPM_ARCHIVE_NAME} not found. Ensure 'npm pack' ran successfully."
+            exit 1
+          fi
