@@ -1,4 +1,4 @@
-name: Publish NPM Package to GitHub Packages
+name: Publish NPM Package to GitHub Packages and JFROG
 
 on:
   workflow_dispatch: # Trigger the workflow manually
