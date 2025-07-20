@@ -19,6 +19,7 @@ jobs:
     permissions:
       contents: read # Allow reading repository content
       packages: write # Allow writing to GitHub Packages
+      id-token: write # Required for OIDC authentication with JFrog
 
     steps:
       - name: Checkout repository
