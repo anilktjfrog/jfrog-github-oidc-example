@@ -1,0 +1,59 @@
+name: Publish NPM Package to GitHub Packages
+
+on:
+  workflow_dispatch: # Trigger the workflow manually
+
+jobs:
+  build-and-github-publish:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+    env:
+      OIDC_PROVIDER: "jfrog-npm-github-oidc-provider" # OIDC provider name for JFrog
+      PLATFORM_REPO: "githubnpm-npm"
+      NPM_SCOPE: "@ps-jfrog" # NPM scope for the package
+      NPM_REGISTRY: "https://npm.pkg.github.com/" # NPM registry URL
+      NODE_VERSION: "20.x" # Node.js version to use
+    defaults:
+      run:
+        working-directory: ./package # All subsequent 'run' commands will execute in this directory
+
+    permissions:
+      contents: read # Allow reading repository content
+      packages: write # Allow writing to GitHub Packages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4 # Action to set up Node.js environment
+        with:
+          node-version: ${{ env.NODE_VERSION }} # Specify the Node.js version to use
+          registry-url: ${{ env.NPM_REGISTRY }} # Configure npm to use GitHub Packages registry
+          # IMPORTANT: The 'scope' here MUST match the scope in your package.json's 'name' field.
+          # For example, if your package name is "@koerber-design-system/my-lib", then scope is @koerber-design-system.
+          scope: ${{ env.NPM_SCOPE }} # Set the NPM scope for the package
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        env:
+          JF_URL: ${{ vars.JF_URL }}
+        with:
+          oidc-provider-name: ${{ env.OIDC_PROVIDER }}
+
+      - name: Set CLI Config
+        run: jf npm-config --global=true --repo-resolve=${{ env.PLATFORM_REPO }} --repo-deploy=${{ env.PLATFORM_REPO }}
+
+      - name: Install dependencies
+        run: npm install # Install all project dependencies
+
+      - name: Test project
+        # Assuming you have a 'test' script defined in your package.json
+        run: npm test # Run the test script for your project
+
+      - name: Publish package
+        run: npm publish # Publish the package to the configured registry
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload package to JFrog
+        run: jf npm-publish --repo=${{ env.PLATFORM_REPO }} --package=./package # Upload the package to JFrog
