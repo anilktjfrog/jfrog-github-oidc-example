@@ -31,3 +31,4 @@ jobs:
                 command: |
                   jf c show
                   jf rt ping
+                  jf rt curl "/api/repositories?type=virtual"
