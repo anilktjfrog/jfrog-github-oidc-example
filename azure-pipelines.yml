@@ -27,7 +27,7 @@ jobs:
             - checkout: self
             - task: JfrogCliV2@1
               inputs:
-                jfrogPlatformConnection: 'azure-jfrog-platform'
+                jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
                 command: |
                   jf c show
                   jf rt ping
