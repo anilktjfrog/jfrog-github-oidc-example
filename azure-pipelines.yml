@@ -20,7 +20,7 @@ steps:
 
 - task: JfrogCliV2@1
   inputs:
-    jfrogPlatformConnection: 'azure-jfrog'
+    jfrogPlatformConnection: 'azure-jfrog-platform'
     command: |
       jf c show
       jf rt ping
