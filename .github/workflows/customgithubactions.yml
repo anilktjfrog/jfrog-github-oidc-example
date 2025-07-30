@@ -1,0 +1,34 @@
+name: GITHUB Artifactory Custom Actions Workflow
+
+on:
+  workflow_dispatch: # Trigger the workflow manually
+
+jobs:
+  build-and-github-publish:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+    env:
+      ARTIFACTORY_URL: "psazuse.jfrog.io"
+    defaults:
+      run:
+        working-directory: ./package # All subsequent 'run' commands will execute in this directory
+
+    permissions:
+      contents: read # Allow reading repository content
+      packages: write # Allow writing to GitHub Packages
+      id-token: write # Required for OIDC authentication with JFrog
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Download file
+        uses: anilktjfrog/jfrog-github-oidc-example/.github/actions/jfrog_actions@main
+        with:
+          sourcefile: anilkt-generic-test-local/Apache-2.0.txt
+          destinationfile: ${{ github.workspace }}/
+          additional_flags: --flat=true --fail-no-op=true
+          action: download
+          artifactory_url: ${{ env.ARTIFACTORY_URL }}
+
+      - name: Display downloaded file
+        run: cat "${{ github.workspace }}/Apache-2.0.txt"

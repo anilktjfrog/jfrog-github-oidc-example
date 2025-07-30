@@ -1,0 +1,79 @@
+name: "Artifactory upload download"
+description: "This action upload and download from artifactory"
+inputs:
+  sourcefile:
+    description: "source file path"
+    required: true
+  destinationfile:
+    description: "Destination file path"
+    required: false
+    default: "."
+  action:
+    description: "Action upload/download/delete/check"
+    required: true
+    default: "upload"
+  artifactory_url:
+    description: "artifactory url"
+    required: true
+  additional_flags:
+    description: "additional flag to pass along with the command"
+    required: false
+outputs:
+  exists:
+    value: ${{ steps.artifactory-linux.outputs.exists || steps.artifactory-win.outputs.exists || false }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: jfrog/setup-jfrog-cli@v4
+      with:
+        oidc-provider-name: "anilkt-github"
+        oidc-audience: "anilkt-jfrog-oidc"
+      env:
+        JF_URL: ${{ inputs.artifactory_url }}
+
+    - name: Linux Artifactory Action
+      if: runner.os != 'Windows'
+      shell: bash
+      id: artifactory-linux
+      run: |
+        if [ "${{ inputs.action }}" == "upload" ]; then
+           jf rt u "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+        elif [ "${{ inputs.action }}" == "download" ] ; then
+           jf rt dl "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+        elif [ "${{ inputs.action }}" == "delete" ] ; then
+           jf rt del "${{ inputs.sourcefile }}" ${{ inputs.additional_flags }}
+        elif [ "${{ inputs.action }}" == "check" ] ; then
+          found_count=$(jf rt s "${{ inputs.sourcefile }}" --count ${{ inputs.additional_flags }})
+          echo $found_count
+          if [ "$found_count" -gt "0" ] ; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "found source"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "didn't find source"
+          fi
+        fi
+
+    - name: Windows Artifactory Action
+      if: runner.os == 'Windows'
+      shell: powershell
+      id: artifactory-win
+      run: |
+        if ("${{ inputs.action }}" -eq "upload") {
+          jf rt u "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+        } elseif ("${{ inputs.action }}" -eq "download") {
+          jf rt dl "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+        } elseif ("${{ inputs.action }}" -eq "delete") {
+          jf rt del "${{ inputs.sourcefile }}" ${{ inputs.additional_flags }}
+        } elseif ("${{ inputs.action }}" -eq "check") {
+          $found_count=$(jf rt s "${{ inputs.sourcefile }}" --count ${{ inputs.additional_flags }})
+          echo $found_count
+          if ($found_count -gt 0) {
+            echo "exists=true" >> $env:GITHUB_OUTPUT
+            echo "found source"
+          } else {
+            echo "exists=false" >> $env:GITHUB_OUTPUT
+            echo "didn't find source"
+          }
+        }
