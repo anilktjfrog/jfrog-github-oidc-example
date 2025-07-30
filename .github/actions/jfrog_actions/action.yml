@@ -48,40 +48,43 @@ runs:
       id: artifactory-linux
       run: |
         if [ "${{ inputs.action }}" == "upload" ]; then
-           download_status=$(jf rt u "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }})
-           if [ "$download_status" -gt "0" ]; then
-             echo "download_status=$download_status" >> $GITHUB_OUTPUT
-             echo "download is successful"
-            else
-              echo "download_status=$download_status" >> $GITHUB_OUTPUT
-              echo "download failed"
-            fi
+          jf rt u "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+          upload_status=$?
+          if [ "$upload_status" -eq 0 ]; then
+            echo "upload_status=$upload_status" >> $GITHUB_OUTPUT
+            echo "upload is successful"
+          else
+            echo "upload_status=$upload_status" >> $GITHUB_OUTPUT
+            echo "upload failed"
+          fi
         elif [ "${{ inputs.action }}" == "download" ] ; then
-           upload_status=$(jf rt dl "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }})
-           if [ "$upload_status" -gt "0" ]; then
-             echo "upload_status=$upload_status" >> $GITHUB_OUTPUT
-             echo "upload is successful"
-           else
-             echo "upload_status=$upload_status" >> $GITHUB_OUTPUT
-             echo "upload failed"
-           fi
+          jf rt dl "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+          download_status=$?
+          if [ "$download_status" -eq 0 ]; then
+            echo "download_status=$download_status" >> $GITHUB_OUTPUT
+            echo "Download is successful"
+          else
+            echo "download_status=$download_status" >> $GITHUB_OUTPUT
+            echo "Download failed"
+          fi
         elif [ "${{ inputs.action }}" == "delete" ] ; then
-           delete_status=$(jf rt del "${{ inputs.sourcefile }}" ${{ inputs.additional_flags }})
-           if [ "$delete_status" -gt "0" ]; then
-             echo "delete_status=$delete_status" >> $GITHUB_OUTPUT
-             echo "delete is successful"
-           else
-             echo "delete_status=$delete_status" >> $GITHUB_OUTPUT
-             echo "delete failed"
-           fi
+           jf rt del "${{ inputs.sourcefile }}" ${{ inputs.additional_flags }}
+           delete_status=$?
+            if [ "$delete_status" -eq 0 ]; then
+              echo "delete_status=$delete_status" >> $GITHUB_OUTPUT
+              echo "delete is successful"
+            else
+              echo "delete_status=$delete_status" >> $GITHUB_OUTPUT
+              echo "delete failed"
+            fi
         elif [ "${{ inputs.action }}" == "check" ] ; then
           search_exists=$(jf rt s "${{ inputs.sourcefile }}" --count ${{ inputs.additional_flags }})
           echo $search_exists
           if [ "$search_exists" -gt "0" ] ; then
-            echo "search_exists=true" >> $GITHUB_OUTPUT
+            echo "search_exists=$search_exists" >> $GITHUB_OUTPUT
             echo "found source"
           else
-            echo "search_exists=false" >> $GITHUB_OUTPUT
+            echo "search_exists=$search_exists" >> $GITHUB_OUTPUT
             echo "didn't find source"
           fi
         fi
@@ -92,16 +95,8 @@ runs:
       id: artifactory-win
       run: |
         if ("${{ inputs.action }}" -eq "upload") {
-          download_status=$(jf rt u "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}))
-          if ($download_status -gt 0) {
-            echo "download_status=$download_status" >> $env:GITHUB_OUTPUT
-            echo "download is successful"
-          } else {
-            echo "download_status=$download_status" >> $env:GITHUB_OUTPUT
-            echo "download failed"
-          }
-        } elseif ("${{ inputs.action }}" -eq "download") {
-          upload_status=$(jf rt dl "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }})
+          jf rt u "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }})
+          upload_status=$LASTEXITCODE
           if ($upload_status -gt 0) {
             echo "upload_status=$upload_status" >> $env:GITHUB_OUTPUT
             echo "upload is successful"
@@ -109,8 +104,19 @@ runs:
             echo "upload_status=$upload_status" >> $env:GITHUB_OUTPUT
             echo "upload failed"
           }
+        } elseif ("${{ inputs.action }}" -eq "download") {
+          jf rt dl "${{ inputs.sourcefile }}" "${{ inputs.destinationfile }}" ${{ inputs.additional_flags }}
+          download_status=$LASTEXITCODE
+          if ($download_status -gt 0) {
+            echo "download_status=$download_status" >> $env:GITHUB_OUTPUT
+            echo "download is successful"
+          } else {
+            echo "download_status=$download_status" >> $env:GITHUB_OUTPUT
+            echo "download failed"
+          }
         } elseif ("${{ inputs.action }}" -eq "delete") {
-          delete_status=$(jf rt del "${{ inputs.sourcefile }}" ${{ inputs.additional_flags }})
+          jf rt del "${{ inputs.sourcefile }}" ${{ inputs.additional_flags }}
+          delete_status=$LASTEXITCODE
           if ($delete_status -gt 0) {
             echo "delete_status=$delete_status" >> $env:GITHUB_OUTPUT
             echo "delete is successful"
