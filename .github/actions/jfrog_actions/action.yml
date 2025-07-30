@@ -42,6 +42,11 @@ runs:
       env:
         JF_URL: ${{ inputs.artifactory_url }}
 
+    - name: Debug OIDC Claims
+      uses: github/actions-oidc-debugger@main
+      with:
+        audience: "${{ github.server_url }}/${{ github.repository_owner }}"
+
     - name: Linux Artifactory Action
       if: runner.os != 'Windows'
       shell: bash
