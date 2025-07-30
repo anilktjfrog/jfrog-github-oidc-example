@@ -23,6 +23,8 @@ jobs:
 
       - name: Download file
         uses: anilktjfrog/jfrog-github-oidc-example/.github/actions/jfrog_actions@main
+        if: github.event_name == 'workflow_dispatch'
+        id: jfrog_action_status
         with:
           sourcefile: anilkt-generic-test-local/Apache-2.0.txt
           destinationfile: ${{ github.workspace }}/
@@ -32,3 +34,7 @@ jobs:
 
       - name: Display downloaded file
         run: cat "${{ github.workspace }}/Apache-2.0.txt"
+
+      - name: Display JFrog Action Download Status
+        run: |
+          echo "Download Status: ${{ steps.jfrog_action_status.outputs.download_status }}"
