@@ -7,7 +7,7 @@ jobs:
   build-and-github-publish:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     env:
-      ARTIFACTORY_URL: "psazuse.jfrog.io"
+      ARTIFACTORY_URL: "https://psazuse.jfrog.io"
     defaults:
       run:
         working-directory: ./package # All subsequent 'run' commands will execute in this directory
