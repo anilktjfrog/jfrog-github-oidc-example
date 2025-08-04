@@ -11,6 +11,8 @@ jobs:
       OIDC_AUDIENCE: "koerber-design-system-github-oidc"
       JF_URL: "https://krbr.jfrog.io"
       JF_PROJECT: "koerber-design"
+      PLATFORM_REPO: "koerber-design-system"
+      NODE_VERSION: 22.x
     defaults:
       run:
         working-directory: ./package # All subsequent 'run' commands will execute in this directory
@@ -42,6 +44,23 @@ jobs:
       - name: Check Connectivity
         run: |
           jf rt ping
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ''
+          scope: '@koerber-design-system'
+          cache: 'yarn'
+
+      - name: Configure Yarn to JFROG NPM Registry
+        run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
+        
+      - name: Build prod
+        run: jf yarn build:prod:all
+        
+      - name: Prepare publish
+        run: jf yarn prepare-publish
 
       - name: Publish Build info With JFrog CLI
         run: |
