@@ -53,6 +53,7 @@ jobs:
           registry-url: ''
           scope: '@koerber-design-system'
           cache: 'yarn'
+          cache-dependency-path: './package/yarn.lock'
 
       - name: Configure Yarn to JFROG NPM Registry
         run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
