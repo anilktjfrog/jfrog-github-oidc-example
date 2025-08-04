@@ -37,3 +37,12 @@ jobs:
       - name: Check Connectivity
         run: |
           jf rt ping
+
+      - name: Publish Build info With JFrog CLI
+        run: |
+          # Collect environment variables for the build
+          jf rt build-collect-env koerber-design ${{ github.run_number }}
+          # Collect VCS details from git and add them to the build
+          jf rt build-add-git koerber-design ${{ github.run_number }}
+          # Publish build info 
+          jf rt build-publish koerber-design ${{ github.run_number }}
