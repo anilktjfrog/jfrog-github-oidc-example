@@ -55,6 +55,11 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: './package/yarn.lock'
 
+      - name: Set Yarn to v2.4.0 or later
+        run: |
+          corepack enable
+          corepack prepare yarn@2.4.0 --activate
+
       - name: Configure Yarn to JFROG NPM Registry
         run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
         
