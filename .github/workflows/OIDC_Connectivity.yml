@@ -1,0 +1,39 @@
+name: Check JFROG Connectivity using OIDC
+
+on:
+  workflow_dispatch: # Trigger the workflow manually
+
+jobs:
+  build-and-github-publish:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+    env:
+      OIDC_PROVIDER: "koerber-design-system-github-oidc" # OIDC provider name for JFrog
+      OIDC_AUDIENCE: "koerber-design-system-github-oidc"
+      JF_URL: "https://krbr.jfrog.io"
+      JF_PROJECT: "koerber-design"
+    defaults:
+      run:
+        working-directory: ./package # All subsequent 'run' commands will execute in this directory
+
+    permissions:
+      contents: read # Allow reading repository content
+      packages: write # Allow writing to GitHub Packages
+      id-token: write # Required for OIDC authentication with JFrog
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        env:
+          JF_URL: ${{ env.JF_URL }}
+          JF_PROJECT: ${{ env.JF_PROJECT }}
+        with:
+          oidc-provider-name: ${{ env.OIDC_PROVIDER }}
+          oidc-audience: ${{ env.OIDC_AUDIENCE }}
+
+      - name: Check Connectivity
+        run: |
+          jf rt ping
