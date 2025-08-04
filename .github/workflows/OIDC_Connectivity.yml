@@ -1,0 +1,73 @@
+name: Check JFROG Connectivity using OIDC
+
+on:
+  workflow_dispatch: # Trigger the workflow manually
+
+jobs:
+  build-and-github-publish:
+    runs-on: ubuntu-latest # Use the latest Ubuntu runner
+    env:
+      OIDC_PROVIDER: "koerber-design-system-github-oidc" # OIDC provider name for JFrog
+      OIDC_AUDIENCE: "koerber-design-system-github-oidc"
+      JF_URL: "https://krbr.jfrog.io"
+      JF_PROJECT: "koerber-design"
+      PLATFORM_REPO: "koerber-design-system"
+      NODE_VERSION: 22.x
+      JFROG_CLI_LOG_LEVEL: DEBUG
+    defaults:
+      run:
+        working-directory: ./package # All subsequent 'run' commands will execute in this directory
+
+    permissions:
+      contents: read # Allow reading repository content
+      packages: write # Allow writing to GitHub Packages
+      id-token: write # Required for OIDC authentication with JFrog
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v3
+        env:
+          JF_URL: ${{ env.JF_URL }}
+          JF_PROJECT: ${{ env.JF_PROJECT }}
+        with:
+          oidc-provider-name: ${{ env.OIDC_PROVIDER }}
+          oidc-audience: ${{ env.OIDC_AUDIENCE }}
+
+      - name: Debug OIDC Claims
+        uses: github/actions-oidc-debugger@main
+        with:
+          audience: '${{ github.server_url }}/${{ github.repository_owner }}'
+
+      - name: Check Connectivity
+        run: |
+          jf rt ping
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ''
+          scope: '@koerber-design-system'
+          cache: 'yarn'
+
+      - name: Configure Yarn to JFROG NPM Registry
+        run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
+        
+      - name: Build prod
+        run: jf yarn build:prod:all
+        
+      - name: Prepare publish
+        run: jf yarn prepare-publish
+
+      - name: Publish Build info With JFrog CLI
+        run: |
+          # Collect environment variables for the build
+          jf rt build-collect-env koerber-design ${{ github.run_number }} --project ${{ env.JF_PROJECT }}
+          # Collect VCS details from git and add them to the build
+          jf rt build-add-git koerber-design ${{ github.run_number }} --project ${{ env.JF_PROJECT }}
+          # Publish build info 
+          jf rt build-publish koerber-design ${{ github.run_number }} --project ${{ env.JF_PROJECT }}
