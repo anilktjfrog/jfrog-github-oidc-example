@@ -63,10 +63,8 @@ jobs:
         env:
           ID_TOKEN: ${{ env.ID_TOKEN }}
         run: |          
-          curl -XPOST "${{ env.JF_URL }}" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"${{ env.ID_TOKEN }}\", \"provider_name\": \"testgithub\"}" -H "Content-Type: application/json"
-          #ACCESS_TOKEN=$(curl -XPOST "${{ env.JF_URL }}" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"${{ env.ID_TOKEN }}\", \"provider_name\": \"testgithub\"}" -H "Content-Type: application/json" | jq .access_token | tr -d '"')
-          #echo "ACCESS_TOKEN=${ACCESS_TOKEN}"
-          #echo "ACCESS_TOKEN=${ACCESS_TOKEN}" >> $GITHUB_OUTPUT
+          ACCESS_TOKEN1=$(curl -XPOST "${{ env.JF_URL }}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$ID_TOKEN\", \"provider_name\": \"testgithub\"}")
+          echo ${ACCESS_TOKEN1}
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
