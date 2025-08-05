@@ -39,10 +39,10 @@ jobs:
           oidc-provider-name: ${{ env.OIDC_PROVIDER }}
           oidc-audience: ${{ env.OIDC_AUDIENCE }}
 
-      - name: Debug OIDC Claims
-        uses: github/actions-oidc-debugger@main
-        with:
-          audience: '${{ github.server_url }}/${{ github.repository_owner }}'
+      #- name: Debug OIDC Claims
+      #  uses: github/actions-oidc-debugger@main
+      #  with:
+      #    audience: '${{ github.server_url }}/${{ github.repository_owner }}'
 
       - name: Check Connectivity
         run: |
@@ -88,22 +88,20 @@ jobs:
 
       #- name: Configure Yarn to JFROG NPM Registry
       #  run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
-      # Use `yarn install` directly with the access token, and then `jf rt build-publish` to collect the build info
-      - name: Install dependencies with Yarn
-        run: |
-          yarn config set 'npmAuthToken' "${{ steps.access_token_step.outputs.access_token }}"
-          
+      # Use `yarn install` directly with the access token, and then `jf rt build-publish` to collect the build info    
         
       - name: Build prod
         run: |
             # Create the .npmrc file with the new token
             echo "Creating .npmrc file with the access token..."
-            cat > .npmrc <<EOF
-              email = anilkt@jfrog.com
-              always-auth = true
-              registry = https://krbr.jfrog.io/artifactory/api/npm/koerber-design-system/
-              //krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=\${{ env.ACCESS_TOKEN1_VALUE }}
-              EOF
+      
+            echo "Creating .npmrc file with the access token..."
+            echo "email = anilkt@jfrog.com" > .npmrc
+            echo "always-auth = true" >> .npmrc
+            echo "registry = https://krbr.jfrog.io/artifactory/api/npm/koerber-design-system/" >> .npmrc
+            echo "//krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=\${{ ACCESS_TOKEN1_VALUE }}" >> .npmrc
+                        
+
             echo ".npmrc file created."
         
             # Output the path to the created .npmrc file
