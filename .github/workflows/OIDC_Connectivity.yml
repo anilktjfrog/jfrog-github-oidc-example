@@ -53,9 +53,8 @@ jobs:
         run: |
           ID_TOKEN=$(curl -sLS -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=testgithub" | jq .value | tr -d '"')
-          echo "ID_TOKEN=${ID_TOKEN}"
-          echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_ENV   
-          token=$(jf eot testgithub $ID_TOKEN)
+          echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_OUTPUT
+          echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_ENV             
           echo "TOKEN=${ID_TOKEN}"
           
       - name: Exchange ID token with access
