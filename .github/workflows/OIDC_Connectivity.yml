@@ -64,10 +64,7 @@ jobs:
         run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
         
       - name: Build prod
-        run: jf yarn build:prod:all
-        
-      - name: Prepare publish
-        run: jf yarn prepare-publish
+        run: jf yarn install koerber-design ${{ github.run_number }}
 
       - name: Publish Build info With JFrog CLI
         run: |
