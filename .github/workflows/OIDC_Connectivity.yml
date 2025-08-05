@@ -32,6 +32,7 @@ jobs:
 
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v3
+        id: setup-cli-main
         env:
           JF_URL: ${{ env.JF_URL }}
           JF_PROJECT: ${{ env.JF_PROJECT }}
@@ -99,7 +100,7 @@ jobs:
             echo "email = anilkt@jfrog.com" > .npmrc
             echo "always-auth = true" >> .npmrc
             echo "registry = https://krbr.jfrog.io/artifactory/api/npm/koerber-design-system/" >> .npmrc
-            echo "//krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=${{ env.ACCESS_TOKEN1_VALUE }}" >> .npmrc
+            echo "//krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=${{ steps.setup-cli-main.outputs.oidc-token }}" >> .npmrc
                         
 
             echo ".npmrc file created."
