@@ -66,6 +66,7 @@ jobs:
           ACCESS_TOKEN1=$(curl -XPOST "${{ env.JF_URL }}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$ID_TOKEN\", \"provider_name\": \"${{ env.OIDC_PROVIDER }}\"}")
           echo ${ACCESS_TOKEN1}
           ACCESS_TOKEN1_VALUE=$(echo $ACCESS_TOKEN1 | jq -r '.access_token')
+          echo "ACCESS_TOKEN1_VALUE=${ACCESS_TOKEN1_VALUE}" >> $GITHUB_ENV
           ACCESS_TOKEN1_USER=$(echo $ACCESS_TOKEN1 | jq -r '.username')
           echo "access_token=${ACCESS_TOKEN1_VALUE}"
           echo "username=${ACCESS_TOKEN1_USER}"
@@ -85,11 +86,30 @@ jobs:
           corepack enable
           corepack prepare yarn@2.4.0 --activate
 
-      - name: Configure Yarn to JFROG NPM Registry
-        run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
+      #- name: Configure Yarn to JFROG NPM Registry
+      #  run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
+      # Use `yarn install` directly with the access token, and then `jf rt build-publish` to collect the build info
+      - name: Install dependencies with Yarn
+        run: |
+          yarn config set 'npmAuthToken' "${{ steps.access_token_step.outputs.access_token }}"
+          
         
       - name: Build prod
-        run: jf yarn install --build-name=koerber-design --build-number=${{ github.run_number }}  --project ${{ env.JF_PROJECT }}
+        run: |
+            # Create the .npmrc file with the new token
+            echo "Creating .npmrc file with the access token..."
+            cat > .npmrc <<EOF
+              email = anilkt@jfrog.com
+              always-auth = true
+              registry = https://krbr.jfrog.io/artifactory/api/npm/koerber-design-system/
+              //krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=\${{ env.ACCESS_TOKEN1_VALUE }}
+              EOF
+            echo ".npmrc file created."
+        
+            # Output the path to the created .npmrc file
+            echo "NPM_CONFIG_FILE=$(pwd)/.npmrc" >> $GITHUB_ENV
+            cat "$(pwd)/.npmrc"
+            yarn install --build-name=koerber-design --build-number=${{ github.run_number }}  --project ${{ env.JF_PROJECT }}
 
       - name: Publish Build info With JFrog CLI
         run: |
