@@ -31,7 +31,7 @@ jobs:
 
 
       - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v3
+        uses: jfrog/setup-jfrog-cli@v4
         id: setup-cli-main
         env:
           JF_URL: ${{ env.JF_URL }}
@@ -48,31 +48,7 @@ jobs:
       - name: Check Connectivity
         run: |
           jf rt ping
-
-      - name: Get ID token
-        shell: bash
-        run: |
-          ID_TOKEN=$(curl -sLS -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ env.OIDC_AUDIENCE }}" | jq .value | tr -d '"')
-          echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_OUTPUT
-          echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_ENV             
-          echo "TOKEN=${ID_TOKEN}"
           
-      - name: Exchange ID token with access
-        shell: bash
-        id: token
-        env:
-          ID_TOKEN: ${{ env.ID_TOKEN }}
-        run: |          
-          ACCESS_TOKEN1=$(curl -XPOST "${{ env.JF_URL }}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$ID_TOKEN\", \"provider_name\": \"${{ env.OIDC_PROVIDER }}\"}")
-          echo ${ACCESS_TOKEN1}
-          ACCESS_TOKEN1_VALUE=$(echo $ACCESS_TOKEN1 | jq -r '.access_token')
-          echo "ACCESS_TOKEN1_VALUE=${ACCESS_TOKEN1_VALUE}" >> $GITHUB_ENV
-          ACCESS_TOKEN1_USER=$(echo $ACCESS_TOKEN1 | jq -r '.username')
-          echo "access_token=${ACCESS_TOKEN1_VALUE}"
-          echo "username=${ACCESS_TOKEN1_USER}"
-          
-
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
         with:
@@ -89,7 +65,10 @@ jobs:
 
       #- name: Configure Yarn to JFROG NPM Registry
       #  run: jf yarn-config --repo-resolve ${{ env.PLATFORM_REPO }}
-      # Use `yarn install` directly with the access token, and then `jf rt build-publish` to collect the build info    
+      # Use `yarn install` directly with the access token, and then `jf rt build-publish` to collect the build info   
+      # Note
+      # using jf yarn install fails as it is executing /api/npm/auth command. If we are using project role as scope in OIDC, 
+      # then it expects username which is not there in the access token generated. So, creating .npmrc file
         
       - name: Build prod
         run: |
@@ -102,7 +81,6 @@ jobs:
             echo "registry = https://krbr.jfrog.io/artifactory/api/npm/koerber-design-system/" >> .npmrc
             echo "//krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=${{ steps.setup-cli-main.outputs.oidc-token }}" >> .npmrc
                         
-
             echo ".npmrc file created."
         
             # Output the path to the created .npmrc file
