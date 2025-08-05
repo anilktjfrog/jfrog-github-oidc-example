@@ -7,10 +7,10 @@ jobs:
   build-and-github-publish:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     env:
-      #OIDC_PROVIDER: "koerber-design-system-github-oidc" # OIDC provider name for JFrog
-      #OIDC_AUDIENCE: "koerber-design-system-github-oidc"
-      OIDC_PROVIDER: "testgithub"
-      OIDC_AUDIENCE: "testgithub"
+      OIDC_PROVIDER: "koerber-design-system-github-oidc" # OIDC provider name for JFrog
+      OIDC_AUDIENCE: "koerber-design-system-github-oidc"
+      #OIDC_PROVIDER: "testgithub"
+      #OIDC_AUDIENCE: "testgithub"
       JF_URL: "https://krbr.jfrog.io"
       JF_PROJECT: "koerber-design"
       PLATFORM_REPO: "koerber-design-system"
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           ID_TOKEN=$(curl -sLS -H "User-Agent: actions/oidc-client" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=testgithub" | jq .value | tr -d '"')
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${{ env.OIDC_AUDIENCE }}" | jq .value | tr -d '"')
           echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_OUTPUT
           echo "ID_TOKEN=${ID_TOKEN}" >> $GITHUB_ENV             
           echo "TOKEN=${ID_TOKEN}"
@@ -63,7 +63,7 @@ jobs:
         env:
           ID_TOKEN: ${{ env.ID_TOKEN }}
         run: |          
-          ACCESS_TOKEN1=$(curl -XPOST "${{ env.JF_URL }}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$ID_TOKEN\", \"provider_name\": \"testgithub\"}")
+          ACCESS_TOKEN1=$(curl -XPOST "${{ env.JF_URL }}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$ID_TOKEN\", \"provider_name\": \"${{ env.OIDC_PROVIDER }}\"}")
           echo ${ACCESS_TOKEN1}
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
