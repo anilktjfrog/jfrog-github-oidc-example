@@ -107,7 +107,7 @@ jobs:
             # Output the path to the created .npmrc file
             echo "NPM_CONFIG_FILE=$(pwd)/.npmrc" >> $GITHUB_ENV
             cat "$(pwd)/.npmrc"
-            yarn install --verbose
+            yarn install
 
       - name: Publish Build info With JFrog CLI
         run: |
