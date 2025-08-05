@@ -65,6 +65,11 @@ jobs:
         run: |          
           ACCESS_TOKEN1=$(curl -XPOST "${{ env.JF_URL }}/access/api/v1/oidc/token" -H "Content-Type: application/json" -d "{\"grant_type\": \"urn:ietf:params:oauth:grant-type:token-exchange\", \"subject_token_type\":\"urn:ietf:params:oauth:token-type:id_token\", \"subject_token\": \"$ID_TOKEN\", \"provider_name\": \"${{ env.OIDC_PROVIDER }}\"}")
           echo ${ACCESS_TOKEN1}
+          ACCESS_TOKEN1_VALUE=$(echo $ACCESS_TOKEN1 | jq -r '.access_token')
+          ACCESS_TOKEN1_USER=$(echo $ACCESS_TOKEN1 | jq -r '.username')
+          echo "access_token=${ACCESS_TOKEN1_VALUE}"
+          echo "username=${ACCESS_TOKEN1_USER}"
+          
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
