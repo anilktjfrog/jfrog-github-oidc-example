@@ -7,8 +7,10 @@ jobs:
   build-and-github-publish:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
     env:
-      OIDC_PROVIDER: "koerber-design-system-github-oidc" # OIDC provider name for JFrog
-      OIDC_AUDIENCE: "koerber-design-system-github-oidc"
+      #OIDC_PROVIDER: "koerber-design-system-github-oidc" # OIDC provider name for JFrog
+      #OIDC_AUDIENCE: "koerber-design-system-github-oidc"
+      OIDC_PROVIDER: "testgithub"
+      OIDC_AUDIENCE: "testgithub"
       JF_URL: "https://krbr.jfrog.io"
       JF_PROJECT: "koerber-design"
       PLATFORM_REPO: "koerber-design-system"
