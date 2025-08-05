@@ -99,7 +99,7 @@ jobs:
             echo "email = anilkt@jfrog.com" > .npmrc
             echo "always-auth = true" >> .npmrc
             echo "registry = https://krbr.jfrog.io/artifactory/api/npm/koerber-design-system/" >> .npmrc
-            echo "//krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=\${{ env.ACCESS_TOKEN1_VALUE }}" >> .npmrc
+            echo "//krbr.jfrog.io/artifactory/api/npm/koerber-design-system/:_authToken=${{ env.ACCESS_TOKEN1_VALUE }}" >> .npmrc
                         
 
             echo ".npmrc file created."
@@ -107,7 +107,7 @@ jobs:
             # Output the path to the created .npmrc file
             echo "NPM_CONFIG_FILE=$(pwd)/.npmrc" >> $GITHUB_ENV
             cat "$(pwd)/.npmrc"
-            yarn install --build-name=koerber-design --build-number=${{ github.run_number }}  --project ${{ env.JF_PROJECT }}
+            yarn install --verbose
 
       - name: Publish Build info With JFrog CLI
         run: |
