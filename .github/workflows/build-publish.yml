@@ -33,6 +33,9 @@ jobs:
        #- name: Run Audit scan for the git workspace
        #  run: jf audit .
 
+       - name: Check connectivity
+         run: jf rt ping
+
        - name: Set CLI Config
          run: jf npm-config --repo-resolve=${{ vars.PLATFORM_REPO }} --repo-deploy=${{ vars.PLATFORM_REPO }}
 
