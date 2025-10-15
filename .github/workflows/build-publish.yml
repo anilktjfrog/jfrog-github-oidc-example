@@ -56,7 +56,6 @@ jobs:
           
           # Collect VCS details from git and add them to the build 
           jf rt build-add-git ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
-          jf rt build-add-dependencies ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
           
           # Publish build info 
           jf rt build-publish ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
