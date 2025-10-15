@@ -23,12 +23,11 @@ jobs:
          uses: actions/setup-node@v3
    
        - name: Setup JFrog CLI
-         uses: jfrog/setup-jfrog-cli@v3
+         uses: jfrog/setup-jfrog-cli@v4
          env:  
            JF_URL: ${{ vars.JF_URL }}
-         with:
            JF_USER: ${{ secrets.JF_USER }}
-           JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
+           JF_PASSWORD: ${{ secrets.JF_PASSWORD }}                    
            
        - name: Run Audit scan for the git workspace
          run: jf audit .
