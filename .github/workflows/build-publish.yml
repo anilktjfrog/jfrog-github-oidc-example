@@ -60,7 +60,5 @@ jobs:
           # Publish build info 
           jf rt build-publish ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
 
-          
-
        - name: Run build scan
-         run: jf rt build-scan naresh-npm-xray ${{ github.run_number }}
+         run: jf rt build-scan ${{ vars.BUILD_NAME }}  ${{ github.run_number }}
