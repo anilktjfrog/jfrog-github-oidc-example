@@ -26,8 +26,8 @@ jobs:
          uses: jfrog/setup-jfrog-cli@v4
          env:  
            JF_URL: ${{ vars.JF_URL }}
-           JF_USER: ${{ secrets.JF_USER }}
-           JF_PASSWORD: ${{ secrets.JF_PASSWORD }}                    
+           JF_USER: ${{ vars.JF_USER }}
+           JF_ACCESS_TOKEN: ${{ vars.JF_ACCESS_TOKEN }}                    
            
        - name: Run Audit scan for the git workspace
          run: jf audit .
