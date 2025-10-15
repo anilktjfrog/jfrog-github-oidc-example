@@ -27,7 +27,8 @@ jobs:
          env:  
            JF_URL: ${{ vars.JF_URL }}
          with:
-           oidc-provider-name: ${{ vars.OIDC_PROVIDER }}
+           JF_USER: ${{ secrets.JF_USER }}
+           JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
            
        - name: Run Audit scan for the git workspace
          run: jf audit .
