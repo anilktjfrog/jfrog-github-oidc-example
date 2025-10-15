@@ -13,6 +13,9 @@ jobs:
   build:
      #runs-on: ubuntu-latest
      runs-on: self-hosted
+     env:
+       JFROG_CLI_LOG_LEVEL: DEBUG
+       
      defaults:
       run:
         working-directory: ./package
@@ -27,21 +30,29 @@ jobs:
          uses: jfrog/setup-jfrog-cli@v4
          env:  
            JF_URL: ${{ vars.JF_URL }}
-           JF_USER: ${{ vars.JF_USER }}
-           JF_ACCESS_TOKEN: ${{ vars.JF_ACCESS_TOKEN }}                    
+           #JF_USER: ${{ vars.JF_USER }}
+           #JF_ACCESS_TOKEN: ${{ vars.JF_ACCESS_TOKEN }}                  
+         with:
+           oidc-provider-name: ${{ vars.OIDC_PROVIDER }} 
            
        #- name: Run Audit scan for the git workspace
        #  run: jf audit .
 
        - name: Check connectivity
-         run: jf rt ping
+         run: |
+           
+           jf rt ping
+
+           jf rt show
 
        - name: Set CLI Config
          run: jf npm-config --repo-resolve=${{ vars.PLATFORM_REPO }} --repo-deploy=${{ vars.PLATFORM_REPO }}
 
            
        - name: Install Dependencies
-         run: jf npm install --build-name=${{ vars.BUILD_NAME }} --build-number=${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
+         run: |
+           npm cache clean --force
+           jf npm install --build-name=${{ vars.BUILD_NAME }} --build-number=${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
            
        - name: Run tests
          run: npm test
