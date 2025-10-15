@@ -10,9 +10,6 @@ permissions:
 jobs:
   build:
      runs-on: ubuntu-latest
-     env:
-      OIDC_PROVIDER: 'nareshgithub'
-      PLATFORM_REPO: 'blr-npm-oidc-virtual'
      defaults:
       run:
         working-directory: ./package
@@ -26,35 +23,37 @@ jobs:
        - name: Setup JFrog CLI
          uses: jfrog/setup-jfrog-cli@v3
          env:  
-           JF_URL: ${{ secrets.JF_URL }}
+           JF_URL: ${{ vars.JF_URL }}
          with:
-           oidc-provider-name: ${{ env.OIDC_PROVIDER }}
+           oidc-provider-name: ${{ vars.OIDC_PROVIDER }}
            
        - name: Run Audit scan for the git workspace
          run: jf audit .
 
        - name: Set CLI Config
-         run: jf npm-config --global=true --repo-resolve=$PLATFORM_REPO --repo-deploy=$PLATFORM_REPO
+         run: jf npm-config --global=true --repo-resolve=${{ vars.PLATFORM_REPO }} --repo-deploy=${{ vars.PLATFORM_REPO }} --project=${{ vars.JFROG_PROJECT_KEY }}
 
            
        - name: Install Dependencies
-         run: jf npm install --registry https://registry.npmjs.org --build-name="naresh-npm-xray" --build-number=${{ github.run_number }}
+         run: jf npm install --build-name=${{ vars.BUILD_NAME }} --build-number=${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
            
        - name: Run tests
          run: npm test
          
        - name: Publish
-         run: jf npm publish --build-name="naresh-npm-xray" --build-number=${{ github.run_number }}
+         run: jf npm publish --build-name=${{ vars.BUILD_NAME }} --build-number=${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
          
        - name: Publish Build info With JFrog CLI
          run: |
           # Collect environment variables for the build
-          jf rt build-collect-env naresh-npm-xray ${{ github.run_number }}
-          # Collect VCS details from git and add them to the build
-          jf rt build-add-git naresh-npm-xray ${{ github.run_number }}
-          jf rt build-add-dependencies naresh-npm-xray ${{ github.run_number }}
+          jf rt build-collect-env ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
+          
+          # Collect VCS details from git and add them to the build 
+          jf rt build-add-git ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
+          jf rt build-add-dependencies ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
+          
           # Publish build info 
-          jf rt build-publish naresh-npm-xray ${{ github.run_number }}
+          jf rt build-publish ${{ vars.BUILD_NAME }} ${{ github.run_number }} --project=${{ vars.JFROG_PROJECT_KEY }}
 
           
 
