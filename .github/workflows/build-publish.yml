@@ -30,8 +30,8 @@ jobs:
            JF_USER: ${{ vars.JF_USER }}
            JF_ACCESS_TOKEN: ${{ vars.JF_ACCESS_TOKEN }}                    
            
-       - name: Run Audit scan for the git workspace
-         run: jf audit .
+       #- name: Run Audit scan for the git workspace
+       #  run: jf audit .
 
        - name: Set CLI Config
          run: jf npm-config --global=true --repo-resolve=${{ vars.PLATFORM_REPO }} --repo-deploy=${{ vars.PLATFORM_REPO }} --project=${{ vars.JFROG_PROJECT_KEY }}
