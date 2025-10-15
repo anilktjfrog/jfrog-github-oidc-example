@@ -34,7 +34,7 @@ jobs:
        #  run: jf audit .
 
        - name: Set CLI Config
-         run: jf npm-config --global=true --repo-resolve=${{ vars.PLATFORM_REPO }} --repo-deploy=${{ vars.PLATFORM_REPO }} --project=${{ vars.JFROG_PROJECT_KEY }}
+         run: jf npm-config --repo-resolve=${{ vars.PLATFORM_REPO }} --repo-deploy=${{ vars.PLATFORM_REPO }}
 
            
        - name: Install Dependencies
