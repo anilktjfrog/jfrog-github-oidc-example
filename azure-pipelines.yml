@@ -32,10 +32,11 @@ jobs:
                   jf c show
                   jf rt ping
                   jf rt curl "/api/repositories?type=virtual"
-            - task: CmdLine@2
-              displayName: 'Download and Run Frogbot'
+
+            - task: JfrogCliV2@1
+              displayName: 'Authenticate and Run Frogbot'
               env:
-                  JF_URL: "https://psemea.jfrog.io"
+                  #JF_URL: "https://psemea.jfrog.io"
                   #JF_ACCESS_TOKEN: $(JF_ACCESS_TOKEN)
                   JF_GIT_TOKEN: $(JF_GIT_TOKEN)
                   #JF_WORKING_DIR: src
@@ -47,10 +48,13 @@ jobs:
                   JF_MIN_SEVERITY: "Medium"
                   JF_AVOID_EXTRA_MESSAGES: "TRUE"
                   JF_PR_COMMENT_TITLE: ""
-      
               inputs:
                 jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
-                script: |
-                  getFrogbotScriptPath=$(if [ -z "$JF_RELEASES_REPO" ]; then echo "https://releases.jfrog.io"; else echo "${JF_URL}/artifactory/${JF_RELEASES_REPO}"; fi)
-                  curl -fLg "$getFrogbotScriptPath/artifactory/frogbot/v2/2.29.4/getFrogbot.sh" | sh
+                command: |
+                  # 1. This exports the JFrog token to the environment so Frogbot can see it
+                  export JF_TOKEN=$(jf c show --format json | jq -r '.[0].accessToken')
+                  export JF_URL=$(jf c show --format json | jq -r '.[0].url')
+                  
+                  # 2. Download and Run Frogbot
+                  curl -fLg "https://releases.jfrog.io/artifactory/frogbot/v2/2.29.4/getFrogbot.sh" | sh
                   ./frogbot cfpr
