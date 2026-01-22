@@ -32,3 +32,25 @@ jobs:
                   jf c show
                   jf rt ping
                   jf rt curl "/api/repositories?type=virtual"
+            - task: CmdLine@2
+              displayName: 'Download and Run Frogbot'
+              env:
+                  JF_URL: "https://psemea.jfrog.io"
+                  #JF_ACCESS_TOKEN: $(JF_ACCESS_TOKEN)
+                  JF_GIT_TOKEN: $(JF_GIT_TOKEN)
+                  #JF_WORKING_DIR: src
+                  JF_PATH_EXCLUSIONS: "*.git*;*node_modules*"
+                  JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
+                  JF_FAIL: "FALSE"
+                  JF_GIT_AGGREGATE_FIXES: "FALSE"
+                  JF_FIXABLE_ONLY: "TRUE"
+                  JF_MIN_SEVERITY: "Medium"
+                  JF_AVOID_EXTRA_MESSAGES: "TRUE"
+                  JF_PR_COMMENT_TITLE: ""
+      
+              inputs:
+                jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
+                script: |
+                  getFrogbotScriptPath=$(if [ -z "$JF_RELEASES_REPO" ]; then echo "https://releases.jfrog.io"; else echo "${JF_URL}/artifactory/${JF_RELEASES_REPO}"; fi)
+                  curl -fLg "$getFrogbotScriptPath/artifactory/frogbot/v2/2.29.4/getFrogbot.sh" | sh
+                  ./frogbot cfpr
