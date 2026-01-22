@@ -12,16 +12,23 @@ variables:
   JF_GIT_BASE_BRANCH: $(Build.SourceBranchName)
   JF_GIT_OWNER: $(System.TeamProject)
   JF_GIT_PROVIDER: 'azureRepos'
-
+  
 jobs:
-  - job:
-    displayName: "Frogbot Scan Repository and Fix"
-    steps:
-      - checkout: self
-      - task: JfrogCliV2@1
-        inputs:
-          jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
-          command: |
-            jf c show
-            jf rt ping
-            jf rt curl "/api/repositories?type=virtual"
+- deployment: MVN_PIPELINE
+  displayName: End to End MVN pipeline
+  environment: 
+    name: gcp
+    resourceType: virtualMachine
+    resourceName: ip-172-18-96-159
+  strategy:
+    runOnce:
+      deploy:   
+          steps:
+            - checkout: self
+            - task: JfrogCliV2@1
+              inputs:
+                jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
+                command: |
+                  jf c show
+                  jf rt ping
+                  jf rt curl "/api/repositories?type=virtual"
