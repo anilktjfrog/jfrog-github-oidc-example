@@ -52,8 +52,8 @@ jobs:
                 jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
                 command: |
                   # 1. This exports the JFrog token to the environment so Frogbot can see it
-                  export JF_TOKEN=$(jf c show --format json | jq -r '.[0].accessToken')
-                  export JF_URL=$(jf c show --format json | jq -r '.[0].url')
+                  export JF_TOKEN=$(jf c export | base64 --decode | jq -r '.accessToken')
+                  export JF_URL=$(jf c export | base64 --decode | jq -r '.url')
                   
                   # 2. Download and Run Frogbot
                   curl -fLg "https://releases.jfrog.io/artifactory/frogbot/v2/2.29.4/getFrogbot.sh" | sh
