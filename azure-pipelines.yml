@@ -26,6 +26,7 @@ jobs:
           steps:
             - checkout: self
             - task: JfrogCliV2@1
+              name: jf_setup # This name is crucial for the next step
               inputs:
                 jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
                 command: |
@@ -33,28 +34,29 @@ jobs:
                   jf rt ping
                   jf rt curl "/api/repositories?type=virtual"
 
-            - task: JfrogCliV2@1
-              displayName: 'Authenticate and Run Frogbot'
+            - task: Bash@3
+              displayName: 'Run Frogbot Scan'
               env:
-                  #JF_URL: "https://psemea.jfrog.io"
-                  #JF_ACCESS_TOKEN: $(JF_ACCESS_TOKEN)
-                  JF_GIT_TOKEN: $(JF_GIT_TOKEN)
-                  #JF_WORKING_DIR: src
-                  JF_PATH_EXCLUSIONS: "*.git*;*node_modules*"
-                  JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
-                  JF_FAIL: "FALSE"
-                  JF_GIT_AGGREGATE_FIXES: "FALSE"
-                  JF_FIXABLE_ONLY: "TRUE"
-                  JF_MIN_SEVERITY: "Medium"
-                  JF_AVOID_EXTRA_MESSAGES: "TRUE"
-                  JF_PR_COMMENT_TITLE: ""
+                # Syntax: $(taskName.variableName)
+                JF_ACCESS_TOKEN: $(jf_setup.oidc_token)
+                JF_URL: $(jf_setup.JF_URL)
+                
+                JF_GIT_TOKEN: $(JF_GIT_TOKEN)
+                #JF_WORKING_DIR: src
+                JF_PATH_EXCLUSIONS: "*.git*;*node_modules*"
+                JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
+                JF_FAIL: "FALSE"
+                JF_GIT_AGGREGATE_FIXES: "FALSE"
+                JF_FIXABLE_ONLY: "TRUE"
+                JF_MIN_SEVERITY: "Medium"
+                JF_AVOID_EXTRA_MESSAGES: "TRUE"
+                JF_PR_COMMENT_TITLE: ""
               inputs:
-                jfrogPlatformConnection: 'azure-jfrog-platform-oidc'
-                command: |
-                  # 1. This exports the JFrog token to the environment so Frogbot can see it
-                  export JF_TOKEN=$(jf c export | base64 --decode | jq -r '.accessToken')
-                  export JF_URL=$(jf c export | base64 --decode | jq -r '.url')
+                targetType: 'inline'
+                script: |
+                  # Verification (optional)
+                  echo "Target Artifactory: $JF_URL"
                   
-                  # 2. Download and Run Frogbot
+                  # Download & Run Frogbot
                   curl -fLg "https://releases.jfrog.io/artifactory/frogbot/v2/2.29.4/getFrogbot.sh" | sh
                   ./frogbot cfpr
