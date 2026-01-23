@@ -39,7 +39,8 @@ jobs:
               env:
                 # Syntax: $(taskName.variableName)
                 JF_ACCESS_TOKEN: $(jf_setup.oidc_token)
-                JF_URL: $(jf_setup.JF_URL)
+                JF_URL: "https://psazuse.jfrog.io"
+                OIDC_USER: $(jf_setup.oidc_user)
                 
                 JF_GIT_TOKEN: $(JF_GIT_TOKEN)
                 #JF_WORKING_DIR: src
