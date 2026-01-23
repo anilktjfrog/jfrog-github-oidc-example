@@ -5,14 +5,13 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  # Predefined Azure Pipelines variables. There's no need to modify them.
   JF_GIT_PROJECT: $(System.TeamProject)
   JF_GIT_REPO: $(Build.Repository.Name)
   JF_GIT_API_ENDPOINT: $(System.CollectionUri)
   JF_GIT_BASE_BRANCH: $(Build.SourceBranchName)
   JF_GIT_OWNER: $(System.TeamProject)
   JF_GIT_PROVIDER: 'azureRepos'
-  
+
 jobs:
 - deployment: MVN_PIPELINE
   displayName: End to End MVN pipeline
@@ -43,6 +42,14 @@ jobs:
                 OIDC_USER: $(jf_setup.oidc_user)
                 
                 JF_GIT_TOKEN: $(JF_GIT_TOKEN)
+
+                # Metadata
+                JF_GIT_PROVIDER: $(JF_GIT_PROVIDER)
+                JF_GIT_PROJECT: $(JF_GIT_PROJECT)
+                JF_GIT_REPO: $(JF_GIT_REPO)
+                JF_GIT_OWNER: $(JF_GIT_OWNER)
+                JF_GIT_API_ENDPOINT: $(JF_GIT_API_ENDPOINT)
+
                 #JF_WORKING_DIR: src
                 JF_PATH_EXCLUSIONS: "*.git*;*node_modules*"
                 JF_INCLUDE_ALL_VULNERABILITIES: "TRUE"
@@ -60,4 +67,4 @@ jobs:
                   
                   # Download & Run Frogbot
                   curl -fLg "https://releases.jfrog.io/artifactory/frogbot/v2/2.29.4/getFrogbot.sh" | sh
-                  ./frogbot cfpr
+                  ./frogbot scan-repository
